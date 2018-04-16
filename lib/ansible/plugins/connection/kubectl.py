@@ -70,6 +70,14 @@ DOCUMENTATION = """
           - name: ansible_kubectl_extra_args
         env:
           - name: K8S_AUTH_EXTRA_ARGS
+      kubectl_cmd_prefix:
+        description:
+          - Extra arguments to pass to the command sent to kubectl.
+        default: ''
+        vars:
+          - name: ansible_kubectl_cmd_prefix
+        env:
+          - name: K8S_AUTH_CMD_PREFIX
       kubectl_kubeconfig:
         description:
           - Path to a kubectl config file. Defaults to I(~/.kube/conig)
@@ -248,7 +256,13 @@ class Connection(ConnectionBase):
         if self.get_option(container_arg_name):
             local_cmd += ['-c', self.get_option(container_arg_name)]
 
-        local_cmd += ['--'] + cmd
+        local_cmd += ['--']
+
+        cmd_prefix = u'{0}_cmd_prefix'.format(self.transport)
+        if self.get_option(cmd_prefix):
+            local_cmd += self.get_option(cmd_prefix).split(' ')
+
+        local_cmd += cmd
 
         return local_cmd
 
